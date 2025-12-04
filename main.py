@@ -84,18 +84,19 @@ def pad(value, bs=BLOCKSIZE):
 
 
 def encrypt(value, key):
-    iv = Random.new().read(BLOCKSIZE)
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    padded_value = pad(value)
-    return iv + cipher.encrypt(padded_value)
+    nonce = Random.new().read(12) 
+    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+    ciphertext, tag = cipher.encrypt_and_digest(value)
+    return nonce + tag + ciphertext
 
 
 def decrypt(value, key):
-    iv = value[:BLOCKSIZE]
-    decrypt_value = value[BLOCKSIZE:]
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    decrypted = cipher.decrypt(decrypt_value)
-    return unpad(decrypted)
+    nonce = value[:12]
+    tag = value[12:28]
+    ciphertext = value[28:]
+    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+    decrypted = cipher.decrypt_and_verify(ciphertext, tag)
+    return decrypted
 
 
 def rp(command):
