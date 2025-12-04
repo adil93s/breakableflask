@@ -68,13 +68,12 @@ DATABASE_CONTENTS = {
 }
 
 def unpad(value, bs=BLOCKSIZE):
-    #pv = ord(value[-1])
     pv = value[-1]
     if pv > bs:
-        raise Exception('Bad padding')
+        raise ValueError('Bad padding')
     padding = value[-pv:]
     if len(padding) != pv or len(set([a for a in padding])) != 1:
-        raise Exception('Bad padding')
+        raise ValueError('Bad padding')
     return value[:-pv]
 
 
@@ -128,19 +127,19 @@ def index():
 # 1. Cookie setter/getter
 @app.route('/cookie', methods = ['POST', 'GET'])
 def cookie():
-    cookieValue = None
+    cookie_value = None
     value = None
     
     if request.method == 'POST':
-        cookieValue = request.form['value']
-        value = cookieValue
+        cookie_value = request.form['value']
+        value = cookie_value
     elif 'value' in request.cookies:
-        cookieValue = pickle.loads(b64decode(request.cookies['value'])) 
+        cookie_value = pickle.loads(b64decode(request.cookies['value'])) 
     
         
     form = """
     <html>
-       <body>Cookie value: """ + str(cookieValue) +"""
+       <body>Cookie value: """ + str(cookie_value) +"""
           <form action = "/cookie" method = "POST">
              <p><h3>Enter value to be stored in cookie</h3></p>
              <p><input type = 'text' name = 'value'/></p>
